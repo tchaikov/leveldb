@@ -1,6 +1,6 @@
 Name:		leveldb
 Version:	1.5.0
-Release:	3%{?dist}
+Release:	4%{?dist}
 Summary:	A fast and lightweight key/value database library by Google
 Group:		Applications/Databases
 License:	BSD
@@ -10,6 +10,8 @@ Source0:	http://leveldb.googlecode.com/files/%{name}-%{version}.tar.gz
 Patch1:		leveldb-0001-Initial-commit-of-the-autotools-stuff.patch
 # Sent upstream - https://code.google.com/p/leveldb/issues/detail?id=102
 Patch2:		leveldb-0002-Add-memory-barrier-on-a-more-arches.patch
+# https://groups.google.com/d/topic/leveldb/SbVPvl4j4vU/discussion
+Patch3:		leveldb-1.5-big-endian-test.patch
 BuildRequires:	snappy-devel
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -37,6 +39,7 @@ Additional header files for development with %{name}.
 %setup -q
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 
 %build
@@ -78,6 +81,9 @@ make check
 
 
 %changelog
+* Tue Aug 21 2012 Dan Horák <dan[at]danny.cz> - 1.5.0-4
+- add workaround for big endians eg. s390(x)
+
 * Thu Jul 19 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
