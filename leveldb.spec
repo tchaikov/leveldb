@@ -1,6 +1,6 @@
 Name:		leveldb
-Version:	1.5.0
-Release:	4%{?dist}
+Version:	1.7.0
+Release:	2%{?dist}
 Summary:	A fast and lightweight key/value database library by Google
 Group:		Applications/Databases
 License:	BSD
@@ -8,10 +8,10 @@ URL:		http://code.google.com/p/leveldb/
 Source0:	http://leveldb.googlecode.com/files/%{name}-%{version}.tar.gz
 # Sent upstream - https://code.google.com/p/leveldb/issues/detail?id=101
 Patch1:		leveldb-0001-Initial-commit-of-the-autotools-stuff.patch
-# Sent upstream - https://code.google.com/p/leveldb/issues/detail?id=102
-Patch2:		leveldb-0002-Add-memory-barrier-on-a-more-arches.patch
+# Temporary workaround for secondary arches
+Patch2:		leveldb-0002-Add-memory-barrier-on-PowerPC.patch
 # https://groups.google.com/d/topic/leveldb/SbVPvl4j4vU/discussion
-Patch3:		leveldb-1.5-big-endian-test.patch
+Patch3:		leveldb-0003-bloom_test-failure-on-big-endian-archs.patch
 BuildRequires:	snappy-devel
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -54,11 +54,11 @@ rm -f %{buildroot}%{_libdir}/*.la
 
 
 %check
-%ifarch armv7hl ppc ppc64
+%ifarch armv7hl
 # FIXME a couple of tests are failing on these secondary arches
 make check || true
 %else
-# x86, x86_64, armv5tel, s390, and s390x are fine
+# x86, x86_64, armv5tel,  ppc, ppc64, ppc64v7 s390, and s390x are fine
 make check
 %endif
 
@@ -81,6 +81,12 @@ make check
 
 
 %changelog
+* Sat Oct 27 2012 Peter Lemenkov <lemenkov@gmail.com> - 1.7.0-2
+- Restored patch no.2
+
+* Sat Oct 27 2012 Peter Lemenkov <lemenkov@gmail.com> - 1.7.0-1
+- Ver. 1.7.0 (API/ABI compatible bugfix release)
+
 * Tue Aug 21 2012 Dan Horák <dan[at]danny.cz> - 1.5.0-4
 - add workaround for big endians eg. s390(x)
 
