@@ -1,6 +1,6 @@
 Name:		leveldb
 Version:	1.7.0
-Release:	3%{?dist}
+Release:	4%{?dist}
 Summary:	A fast and lightweight key/value database library by Google
 Group:		Applications/Databases
 License:	BSD
@@ -12,6 +12,8 @@ Patch1:		leveldb-0001-Initial-commit-of-the-autotools-stuff.patch
 Patch2:		leveldb-0002-Add-memory-barrier-on-PowerPC.patch
 # https://groups.google.com/d/topic/leveldb/SbVPvl4j4vU/discussion
 Patch3:		leveldb-0003-bloom_test-failure-on-big-endian-archs.patch
+# available in https://github.com/fusesource/leveldbjni/blob/leveldbjni-[LEVELDBJNI VERSION]/leveldb.patch
+Patch4:		leveldb-0004-leveldbjni.patch
 BuildRequires:	snappy-devel
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -40,7 +42,7 @@ Additional header files for development with %{name}.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
-
+%patch4 -p1
 
 %build
 autoreconf -ivf
@@ -81,6 +83,9 @@ make check
 
 
 %changelog
+* Thu Nov 29 2012 gil cattaneo <puntogil@libero.it> - 1.7.0-4
+- Applied patch for allow leveldbjni build
+
 * Sat Oct 27 2012 Peter Lemenkov <lemenkov@gmail.com> - 1.7.0-3
 - Dirty workarounds for failed tests on ARM
 
