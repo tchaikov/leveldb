@@ -1,41 +1,38 @@
-Name:		leveldb
-Version:	1.9.0
-Release:	1%{?dist}
-Summary:	A fast and lightweight key/value database library by Google
-Group:		Applications/Databases
-License:	BSD
-URL:		http://code.google.com/p/leveldb/
-Source0:	http://leveldb.googlecode.com/files/%{name}-%{version}.tar.gz
+Name:           leveldb
+Version:        1.12.0
+Release:        1%{?dist}
+Summary:        A fast and lightweight key/value database library by Google
+Group:          Applications/Databases
+License:        BSD
+URL:            http://code.google.com/p/leveldb/
+Source0:        http://leveldb.googlecode.com/files/%{name}-%{version}.tar.gz
 # Sent upstream - https://code.google.com/p/leveldb/issues/detail?id=101
-Patch1:		leveldb-0001-Initial-commit-of-the-autotools-stuff.patch
+Patch1:         leveldb-0001-Initial-commit-of-the-autotools-stuff.patch
 # Temporary workaround for secondary arches
-Patch2:		leveldb-0002-Add-memory-barrier-on-PowerPC.patch
+Patch2:         leveldb-0002-Add-memory-barrier-on-PowerPC.patch
 # https://groups.google.com/d/topic/leveldb/SbVPvl4j4vU/discussion
-Patch3:		leveldb-0003-bloom_test-failure-on-big-endian-archs.patch
+Patch3:         leveldb-0003-bloom_test-failure-on-big-endian-archs.patch
 # available in https://github.com/fusesource/leveldbjni/blob/leveldbjni-[LEVELDBJNI VERSION]/leveldb.patch
-Patch4:		leveldb-0004-leveldbjni.patch
-BuildRequires:	snappy-devel
-BuildRequires:	autoconf
-BuildRequires:	automake
-BuildRequires:	libtool
+Patch4:         leveldb-0004-leveldbjni.patch
+BuildRequires:  snappy-devel
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  libtool
 
 
 %description
 LevelDB is a fast key-value storage library written at Google that provides an
 ordered mapping from string keys to string values.
 
-
 %package devel
-Summary: The development files for %{name}
-Group: Development/Libraries
-Requires: pkgconfig
-Requires: %{name}%{?_isa} = %{version}-%{release}
-Requires: pkgconfig
-
+Summary:        The development files for %{name}
+Group:          Development/Libraries
+Requires:       pkgconfig
+Requires:       %{name}%{?_isa} = %{version}-%{release}
+Requires:       pkgconfig
 
 %description devel
 Additional header files for development with %{name}.
-
 
 %prep
 %setup -q
@@ -82,6 +79,9 @@ make check
 
 
 %changelog
+* Sat Jun 29 2013 gil cattaneo <puntogil@libero.it> - 1.12.0-1
+- update to 1.12.0
+
 * Wed Feb 27 2013 gil cattaneo <puntogil@libero.it> - 1.9.0-1
 - update to 1.9.0
 
