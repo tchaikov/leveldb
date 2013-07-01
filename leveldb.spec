@@ -1,6 +1,6 @@
 Name:           leveldb
 Version:        1.12.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A fast and lightweight key/value database library by Google
 Group:          Applications/Databases
 License:        BSD
@@ -14,6 +14,10 @@ Patch2:         leveldb-0002-Add-memory-barrier-on-PowerPC.patch
 Patch3:         leveldb-0003-bloom_test-failure-on-big-endian-archs.patch
 # available in https://github.com/fusesource/leveldbjni/blob/leveldbjni-[LEVELDBJNI VERSION]/leveldb.patch
 Patch4:         leveldb-0004-leveldbjni.patch
+# https://github.com/fusesource/leveldbjni/issues/34
+# https://code.google.com/p/leveldb/issues/detail?id=184
+# Add DB::SuspendCompactions() and DB:: ResumeCompactions() methods
+Patch5:         184.patch
 BuildRequires:  snappy-devel
 BuildRequires:  autoconf
 BuildRequires:  automake
@@ -40,6 +44,7 @@ Additional header files for development with %{name}.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
+%patch5 -p1
 
 %build
 autoreconf -ivf
@@ -79,6 +84,9 @@ make check
 
 
 %changelog
+* Mon Jul 01 2013 gil cattaneo <puntogil@libero.it> 1.12.0-2
+- add SuspendCompactions and ResumeCompactions methods for allow leveldbjni build
+
 * Sat Jun 29 2013 gil cattaneo <puntogil@libero.it> - 1.12.0-1
 - update to 1.12.0
 
