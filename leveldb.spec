@@ -1,11 +1,13 @@
 Name:           leveldb
 Version:        1.12.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        A fast and lightweight key/value database library by Google
 Group:          Applications/Databases
 License:        BSD
 URL:            http://code.google.com/p/leveldb/
+VCS:		http://git.fedorahosted.org/git/leveldb.git
 Source0:        http://leveldb.googlecode.com/files/%{name}-%{version}.tar.gz
+
 # Sent upstream - https://code.google.com/p/leveldb/issues/detail?id=101
 Patch1:         leveldb-0001-Initial-commit-of-the-autotools-stuff.patch
 # Temporary workaround for secondary arches
@@ -13,11 +15,13 @@ Patch2:         leveldb-0002-Add-memory-barrier-on-PowerPC.patch
 # https://groups.google.com/d/topic/leveldb/SbVPvl4j4vU/discussion
 Patch3:         leveldb-0003-bloom_test-failure-on-big-endian-archs.patch
 # available in https://github.com/fusesource/leveldbjni/blob/leveldbjni-[LEVELDBJNI VERSION]/leveldb.patch
-Patch4:         leveldb-0004-leveldbjni.patch
+Patch4:         leveldb-0004-Allow-leveldbjni-build.patch
 # https://github.com/fusesource/leveldbjni/issues/34
 # https://code.google.com/p/leveldb/issues/detail?id=184
 # Add DB::SuspendCompactions() and DB:: ResumeCompactions() methods
-Patch5:         184.patch
+Patch5:         leveldb-0005-Added-a-DB-SuspendCompations-and-DB-ResumeCompaction.patch
+# Cherry-picked from Basho's fork
+Patch6:		leveldb-0006-allow-Get-calls-to-avoid-copies-into-std-string.patch
 BuildRequires:  snappy-devel
 BuildRequires:  autoconf
 BuildRequires:  automake
@@ -45,6 +49,7 @@ Additional header files for development with %{name}.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
+%patch6 -p1
 
 %build
 autoreconf -ivf
@@ -84,6 +89,9 @@ make check
 
 
 %changelog
+* Wed Jul 10 2013 Peter Lemenkov <lemenkov@gmail.com> - 1.12.0-3
+- Backported Basho's patch (see rhbz#982980)
+
 * Mon Jul 01 2013 gil cattaneo <puntogil@libero.it> 1.12.0-2
 - add SuspendCompactions and ResumeCompactions methods for allow leveldbjni build
 

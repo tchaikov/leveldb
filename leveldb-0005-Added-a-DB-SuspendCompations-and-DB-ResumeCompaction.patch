@@ -1,10 +1,16 @@
-commit c503661b43c3c86cb87741e4164626f200db95c9
-Author: Hiram Chirino <hiram@hiramchirino.com>
-Date:   Tue Oct 30 16:56:52 2012 -0400
+From d2545cbf7f7dfae4b1d01c299ed0e17d71664439 Mon Sep 17 00:00:00 2001
+From: Hiram Chirino <hiram@hiramchirino.com>
+Date: Tue, 30 Oct 2012 16:56:52 -0400
+Subject: [PATCH 5/6] Added a DB:SuspendCompations() and DB:ResumeCompactions()
+ methods. Fixes issue #184
 
-    Added a DB:SuspendCompations() and DB:ResumeCompactions() methods. Fixes issue #184
-    
-    https://code.google.com/p/leveldb/issues/detail?id=184
+https://code.google.com/p/leveldb/issues/detail?id=184
+---
+ db/db_impl.cc        | 36 ++++++++++++++++++++++++++++++++++++
+ db/db_impl.h         |  9 +++++++++
+ db/db_test.cc        |  4 ++++
+ include/leveldb/db.h |  6 ++++++
+ 4 files changed, 55 insertions(+)
 
 diff --git a/db/db_impl.cc b/db/db_impl.cc
 index 395d317..593a5b5 100644
@@ -119,3 +125,6 @@ index da8b11a..089707c 100644
   private:
    // No copying allowed
    DB(const DB&);
+-- 
+1.8.3.1
+

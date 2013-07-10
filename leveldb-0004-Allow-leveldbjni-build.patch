@@ -1,7 +1,18 @@
-diff -Nru leveldb-1.7.0/build_detect_platform leveldb-1.7.0-gil/build_detect_platform
---- leveldb-1.7.0/build_detect_platform	2012-10-17 01:12:49.000000000 +0200
-+++ leveldb-1.7.0-gil/build_detect_platform	2012-11-28 17:57:09.341801632 +0100
-@@ -194,8 +194,9 @@
+From d8886e456b6adf59dbbfa4006c96b43312c28918 Mon Sep 17 00:00:00 2001
+From: Hiram Chirino <chirino@gmail.com>
+Date: Fri, 5 Jul 2013 18:32:28 +0400
+Subject: [PATCH 4/6] Allow leveldbjni build
+
+---
+ build_detect_platform   | 5 +++--
+ include/leveldb/slice.h | 1 -
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/build_detect_platform b/build_detect_platform
+index d50869d..08157a1 100755
+--- a/build_detect_platform
++++ b/build_detect_platform
+@@ -203,8 +203,9 @@ echo "CXX=$CXX" >> $OUTPUT
  echo "PLATFORM=$PLATFORM" >> $OUTPUT
  echo "PLATFORM_LDFLAGS=$PLATFORM_LDFLAGS" >> $OUTPUT
  echo "PLATFORM_LIBS=$PLATFORM_LIBS" >> $OUTPUT
@@ -13,10 +24,11 @@ diff -Nru leveldb-1.7.0/build_detect_platform leveldb-1.7.0-gil/build_detect_pla
  echo "PLATFORM_SHARED_CFLAGS=$PLATFORM_SHARED_CFLAGS" >> $OUTPUT
  echo "PLATFORM_SHARED_EXT=$PLATFORM_SHARED_EXT" >> $OUTPUT
  echo "PLATFORM_SHARED_LDFLAGS=$PLATFORM_SHARED_LDFLAGS" >> $OUTPUT
-diff -Nru leveldb-1.7.0/include/leveldb/slice.h leveldb-1.7.0-gil/include/leveldb/slice.h
---- leveldb-1.7.0/include/leveldb/slice.h	2012-10-17 01:12:50.000000000 +0200
-+++ leveldb-1.7.0-gil/include/leveldb/slice.h	2012-11-28 17:52:27.747714857 +0100
-@@ -77,7 +77,6 @@
+diff --git a/include/leveldb/slice.h b/include/leveldb/slice.h
+index 74ea8fa..135bbd7 100644
+--- a/include/leveldb/slice.h
++++ b/include/leveldb/slice.h
+@@ -77,7 +77,6 @@ class Slice {
              (memcmp(data_, x.data_, x.size_) == 0));
    }
  
@@ -24,3 +36,6 @@ diff -Nru leveldb-1.7.0/include/leveldb/slice.h leveldb-1.7.0-gil/include/leveld
    const char* data_;
    size_t size_;
  
+-- 
+1.8.3.1
+
