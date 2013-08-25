@@ -1,6 +1,6 @@
 Name:           leveldb
 Version:        1.12.0
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        A fast and lightweight key/value database library by Google
 Group:          Applications/Databases
 License:        BSD
