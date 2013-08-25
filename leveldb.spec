@@ -5,7 +5,9 @@ Summary:        A fast and lightweight key/value database library by Google
 Group:          Applications/Databases
 License:        BSD
 URL:            http://code.google.com/p/leveldb/
+%if 0%{?el7}%{?fedora}
 VCS:		http://git.fedorahosted.org/git/leveldb.git
+%endif
 Source0:        http://leveldb.googlecode.com/files/%{name}-%{version}.tar.gz
 
 # Sent upstream - https://code.google.com/p/leveldb/issues/detail?id=101
@@ -53,7 +55,7 @@ Additional header files for development with %{name}.
 
 %build
 autoreconf -ivf
-%configure --disable-static --with-pic
+CFLAGS="%{optflags} -DNDEBUG" CXXFLAGS="%{optflags} -DNDEBUG" %configure --disable-static --with-pic
 make %{?_smp_mflags}
 
 
@@ -63,8 +65,9 @@ rm -f %{buildroot}%{_libdir}/*.la
 
 
 %check
-%ifarch armv5tel armv7hl ppc %{power64}
-# FIXME a couple of tests are failing on these secondary arches
+%ifarch armv5tel armv7hl %{power64}
+# FIXME a couple of tests are failing on these secondary arches, see
+# https://bugzilla.redhat.com/908800
 make check || true
 %else
 # x86, x86_64, ppc, ppc64, ppc64v7 s390, and s390x are fine
@@ -89,6 +92,9 @@ make check
 
 
 %changelog
+* Sun Aug 25 2013 Peter Lemenkov <lemenkov@gmail.com> - 1.12.0-5
+- Don't build with assertions
+
 * Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.12.0-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
