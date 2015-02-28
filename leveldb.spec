@@ -1,6 +1,6 @@
 Name:           leveldb
 Version:        1.12.0
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        A fast and lightweight key/value database library by Google
 Group:          Applications/Databases
 License:        BSD
@@ -92,6 +92,9 @@ make check
 
 
 %changelog
+* Sun Mar  1 2015 Mamoru TASAKA <mtasaka@fedoraproject.org> - 1.12.0-8
+- F-23: rebuild for gcc5 ABI change
+
 * Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.12.0-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
