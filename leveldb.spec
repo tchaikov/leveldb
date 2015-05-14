@@ -1,6 +1,6 @@
 Name:           leveldb
 Version:        1.12.0
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        A fast and lightweight key/value database library by Google
 Group:          Applications/Databases
 License:        BSD
@@ -92,6 +92,9 @@ make check
 
 
 %changelog
+* Thu May 14 2015 Tomas Hozza <thozza@redhat.com> - 1.12.0-9
+- rebuild with newer gcc to resolve linking issues with Ceph
+
 * Sun Mar  1 2015 Mamoru TASAKA <mtasaka@fedoraproject.org> - 1.12.0-8
 - F-23: rebuild for gcc5 ABI change
 
