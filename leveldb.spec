@@ -65,7 +65,7 @@ rm -f %{buildroot}%{_libdir}/*.la
 
 
 %check
-%ifarch armv5tel armv7hl %{power64}
+%ifarch aarch64 armv5tel armv7hl %{power64}
 # FIXME a couple of tests are failing on these secondary arches, see
 # https://bugzilla.redhat.com/908800
 make check || true
