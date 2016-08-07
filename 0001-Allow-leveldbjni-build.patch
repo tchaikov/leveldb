@@ -1,7 +1,7 @@
-From d8886e456b6adf59dbbfa4006c96b43312c28918 Mon Sep 17 00:00:00 2001
+From ed12845f30766e0400d77728b66867ecf4d42a95 Mon Sep 17 00:00:00 2001
 From: Hiram Chirino <chirino@gmail.com>
 Date: Fri, 5 Jul 2013 18:32:28 +0400
-Subject: [PATCH 4/6] Allow leveldbjni build
+Subject: [PATCH 1/4] Allow leveldbjni build
 
 ---
  build_detect_platform   | 5 +++--
@@ -9,10 +9,10 @@ Subject: [PATCH 4/6] Allow leveldbjni build
  2 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/build_detect_platform b/build_detect_platform
-index d50869d..08157a1 100755
+index bb76c4f..c003328 100755
 --- a/build_detect_platform
 +++ b/build_detect_platform
-@@ -203,8 +203,9 @@ echo "CXX=$CXX" >> $OUTPUT
+@@ -220,8 +220,9 @@ echo "CXX=$CXX" >> $OUTPUT
  echo "PLATFORM=$PLATFORM" >> $OUTPUT
  echo "PLATFORM_LDFLAGS=$PLATFORM_LDFLAGS" >> $OUTPUT
  echo "PLATFORM_LIBS=$PLATFORM_LIBS" >> $OUTPUT
@@ -25,7 +25,7 @@ index d50869d..08157a1 100755
  echo "PLATFORM_SHARED_EXT=$PLATFORM_SHARED_EXT" >> $OUTPUT
  echo "PLATFORM_SHARED_LDFLAGS=$PLATFORM_SHARED_LDFLAGS" >> $OUTPUT
 diff --git a/include/leveldb/slice.h b/include/leveldb/slice.h
-index 74ea8fa..135bbd7 100644
+index bc36798..6f2289a 100644
 --- a/include/leveldb/slice.h
 +++ b/include/leveldb/slice.h
 @@ -77,7 +77,6 @@ class Slice {
@@ -37,5 +37,5 @@ index 74ea8fa..135bbd7 100644
    size_t size_;
  
 -- 
-1.8.3.1
+2.9.2
 

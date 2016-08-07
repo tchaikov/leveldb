@@ -1,97 +1,91 @@
 Name:           leveldb
-Version:        1.12.0
-Release:        11%{?dist}
+Version:        1.18
+Release:        1%{?dist}
 Summary:        A fast and lightweight key/value database library by Google
-Group:          Applications/Databases
 License:        BSD
-URL:            http://code.google.com/p/leveldb/
-%if 0%{?el7}%{?fedora}
-VCS:		http://git.fedorahosted.org/git/leveldb.git
-%endif
-Source0:        http://leveldb.googlecode.com/files/%{name}-%{version}.tar.gz
+URL:            https://github.com/google/leveldb
+Source0:        %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
 
-# Sent upstream - https://code.google.com/p/leveldb/issues/detail?id=101
-Patch1:         leveldb-0001-Initial-commit-of-the-autotools-stuff.patch
-# Temporary workaround for secondary arches
-Patch2:         leveldb-0002-Add-memory-barrier-on-PowerPC.patch
-# https://groups.google.com/d/topic/leveldb/SbVPvl4j4vU/discussion
-Patch3:         leveldb-0003-bloom_test-failure-on-big-endian-archs.patch
-# available in https://github.com/fusesource/leveldbjni/blob/leveldbjni-[LEVELDBJNI VERSION]/leveldb.patch
-Patch4:         leveldb-0004-Allow-leveldbjni-build.patch
+# available in https://github.com/fusesource/leveldbjni/blob/leveldb.patch
+Patch0001:      0001-Allow-leveldbjni-build.patch
 # https://github.com/fusesource/leveldbjni/issues/34
 # https://code.google.com/p/leveldb/issues/detail?id=184
 # Add DB::SuspendCompactions() and DB:: ResumeCompactions() methods
-Patch5:         leveldb-0005-Added-a-DB-SuspendCompations-and-DB-ResumeCompaction.patch
+Patch0002:      0002-Added-a-DB-SuspendCompations-and-DB-ResumeCompaction.patch
 # Cherry-picked from Basho's fork
-Patch6:		leveldb-0006-allow-Get-calls-to-avoid-copies-into-std-string.patch
-BuildRequires:  snappy-devel
-BuildRequires:  autoconf
-BuildRequires:  automake
-BuildRequires:  libtool
+Patch0003:      0003-allow-Get-calls-to-avoid-copies-into-std-string.patch
+# https://groups.google.com/d/topic/leveldb/SbVPvl4j4vU/discussion
+Patch0004:      0004-bloom_test-failure-on-big-endian-archs.patch
 
+BuildRequires:  make
+BuildRequires:  gcc
+BuildRequires:  gcc-c++
+BuildRequires:  snappy-devel
 
 %description
 LevelDB is a fast key-value storage library written at Google that provides an
 ordered mapping from string keys to string values.
 
 %package devel
-Summary:        The development files for %{name}
-Group:          Development/Libraries
-Requires:       pkgconfig
-Requires:       %{name}%{?_isa} = %{version}-%{release}
-Requires:       pkgconfig
+Summary:        Development files for %{name}
+Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description devel
-Additional header files for development with %{name}.
+%{summary}.
 
 %prep
-%setup -q
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
+%autosetup -p1
+cat > %{name}.pc << EOF
+prefix=%{_prefix}
+exec_prefix=${prefix}
+libdir=%{_libdir}
+includedir=%{_includedir}
+
+Name: %{name}
+Description: %{summary}
+Version: %{version}
+Libs: -l%{name}
+EOF
+
+%global configure() {                  \
+  export OPT="-DNDEBUG"                \
+  export CFLAGS="%{optflags}"          \
+  export CXXFLAGS="%{optflags}"        \
+  export LDFLAGS="%{__global_ldflags}" \
+}
 
 %build
-autoreconf -ivf
-CFLAGS="%{optflags} -DNDEBUG" CXXFLAGS="%{optflags} -DNDEBUG" %configure --disable-static --with-pic
-make %{?_smp_mflags}
-
+%configure
+%make_build
 
 %install
-make install DESTDIR=%{buildroot}
-rm -f %{buildroot}%{_libdir}/*.la
-
+mkdir -p %{buildroot}{%{_libdir}/pkgconfig,%{_includedir}}
+cp -a lib%{name}.so* %{buildroot}%{_libdir}/
+cp -a include/%{name}/ %{buildroot}%{_includedir}/
+cp -a %{name}.pc %{buildroot}%{_libdir}/pkgconfig/
 
 %check
-%ifarch aarch64 armv5tel armv7hl %{power64}
-# FIXME a couple of tests are failing on these secondary arches, see
-# https://bugzilla.redhat.com/908800
-make check || true
-%else
-# x86, x86_64, ppc, ppc64, ppc64v7 s390, and s390x are fine
-make check
-%endif
+%configure
+make %{?_smp_mflags} check
 
 %post -p /sbin/ldconfig
-
-
 %postun -p /sbin/ldconfig
 
-
 %files
-%doc doc/ AUTHORS LICENSE README
+%license LICENSE
 %{_libdir}/lib%{name}.so.*
 
-
 %files devel
+%doc doc/ README
 %{_includedir}/%{name}/
 %{_libdir}/lib%{name}.so
 %{_libdir}/pkgconfig/%{name}.pc
 
-
 %changelog
+* Sun Aug 07 2016 Igor Gnatenko <ignatenko@redhat.com> - 1.18-1
+- Update to 1.18 (RHBZ #1306611)
+- Cleanups and fixes in spec
+
 * Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 1.12.0-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 
