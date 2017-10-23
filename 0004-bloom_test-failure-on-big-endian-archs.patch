@@ -1,4 +1,4 @@
-From 82f6b7ee14a1ccfe442d80725234652f321664f5 Mon Sep 17 00:00:00 2001
+From 9992080e51c3deff0b82ce838b64ef6b68bd81f0 Mon Sep 17 00:00:00 2001
 From: Yehuda Sadeh <yehuda@inktank.com>
 Date: Mon, 2 Jul 2012 14:29:06 -0700
 Subject: [PATCH 4/4] bloom_test failure on big endian archs
@@ -17,10 +17,12 @@ https://groups.google.com/d/topic/leveldb/SbVPvl4j4vU/discussion
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/util/bloom_test.cc b/util/bloom_test.cc
-index 77fb1b3..10b70e4 100644
+index 1b87a2be3f540c673ee1749b0b855d396251f5aa..e464548c339d8a8a3f9a620ddcd73710c3825c2f 100644
 --- a/util/bloom_test.cc
 +++ b/util/bloom_test.cc
-@@ -141,7 +141,7 @@ TEST(BloomTest, VaryingLengths) {
+@@ -140,11 +140,11 @@ TEST(BloomTest, VaryingLengths) {
+     double rate = FalsePositiveRate();
+     if (kVerbose >= 1) {
        fprintf(stderr, "False positives: %5.2f%% @ length = %6d ; bytes = %6d\n",
                rate*100.0, length, static_cast<int>(FilterSize()));
      }
@@ -29,6 +31,8 @@ index 77fb1b3..10b70e4 100644
      if (rate > 0.0125) mediocre_filters++;  // Allowed, but not too often
      else good_filters++;
    }
+   if (kVerbose >= 1) {
+     fprintf(stderr, "Filters: %d good, %d mediocre\n",
 -- 
-2.9.2
+2.14.2
 

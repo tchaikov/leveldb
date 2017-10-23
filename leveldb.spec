@@ -1,6 +1,6 @@
 Name:           leveldb
-Version:        1.18
-Release:        5%{?dist}
+Version:        1.20
+Release:        1%{?dist}
 Summary:        A fast and lightweight key/value database library by Google
 License:        BSD
 URL:            https://github.com/google/leveldb
@@ -60,7 +60,7 @@ EOF
 
 %install
 mkdir -p %{buildroot}{%{_libdir}/pkgconfig,%{_includedir}}
-cp -a lib%{name}.so* %{buildroot}%{_libdir}/
+cp -a out-shared/lib%{name}.so* %{buildroot}%{_libdir}/
 cp -a include/%{name}/ %{buildroot}%{_includedir}/
 cp -a %{name}.pc %{buildroot}%{_libdir}/pkgconfig/
 
@@ -73,15 +73,19 @@ make %{?_smp_mflags} check
 
 %files
 %license LICENSE
+%doc AUTHORS README.md NEWS
 %{_libdir}/lib%{name}.so.*
 
 %files devel
-%doc doc/ README
+%doc doc/ CONTRIBUTING.md TODO
 %{_includedir}/%{name}/
 %{_libdir}/lib%{name}.so
 %{_libdir}/pkgconfig/%{name}.pc
 
 %changelog
+* Mon Oct 23 2017 Stephen Gallagher <sgallagh@redhat.com> - 1.20-1
+- Update to 1.20
+
 * Thu Aug 03 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.18-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 

@@ -1,4 +1,4 @@
-From 4d6070e6a5bb9579b5c3f180e49536d8dcd03813 Mon Sep 17 00:00:00 2001
+From 9f7a39eb2fc0bf4e7c4df64dca5e3ed01cbde2c1 Mon Sep 17 00:00:00 2001
 From: Hiram Chirino <hiram@hiramchirino.com>
 Date: Tue, 30 Oct 2012 16:56:52 -0400
 Subject: [PATCH 2/4] Added a DB:SuspendCompations() and DB:ResumeCompactions()
@@ -13,10 +13,12 @@ https://code.google.com/p/leveldb/issues/detail?id=184
  4 files changed, 55 insertions(+)
 
 diff --git a/db/db_impl.cc b/db/db_impl.cc
-index 49b9595..fc4209d 100644
+index f43ad7679436b312959e5e0487c9313694d83ecc..60c483fab11177fb2d37726f3b2a94720e4dd1ff 100644
 --- a/db/db_impl.cc
 +++ b/db/db_impl.cc
-@@ -124,6 +124,9 @@ DBImpl::DBImpl(const Options& raw_options, const std::string& dbname)
+@@ -123,10 +123,13 @@ DBImpl::DBImpl(const Options& raw_options, const std::string& dbname)
+       owns_info_log_(options_.info_log != raw_options.info_log),
+       owns_cache_(options_.block_cache != raw_options.block_cache),
        dbname_(dbname),
        db_lock_(NULL),
        shutting_down_(NULL),
@@ -24,9 +26,13 @@ index 49b9595..fc4209d 100644
 +      suspend_count(0),
 +      suspended(false),
        bg_cv_(&mutex_),
-       mem_(new MemTable(internal_comparator_)),
+       mem_(NULL),
        imm_(NULL),
-@@ -1426,6 +1429,39 @@ void DBImpl::GetApproximateSizes(
+       logfile_(NULL),
+       logfile_number_(0),
+@@ -1469,10 +1472,43 @@ void DBImpl::GetApproximateSizes(
+     MutexLock l(&mutex_);
+     v->Unref();
    }
  }
  
@@ -66,11 +72,15 @@ index 49b9595..fc4209d 100644
  // Default implementations of convenience methods that subclasses of DB
  // can call if they wish
  Status DB::Put(const WriteOptions& opt, const Slice& key, const Slice& value) {
+   WriteBatch batch;
+   batch.Put(key, value);
 diff --git a/db/db_impl.h b/db/db_impl.h
-index cfc9981..cda1d51 100644
+index 8ff323e72879967a9ff27876155a21ffb2330d3d..78f910356318cfdd3bb4ee029a50d8a76161037f 100644
 --- a/db/db_impl.h
 +++ b/db/db_impl.h
-@@ -41,6 +41,8 @@ class DBImpl : public DB {
+@@ -39,10 +39,12 @@ class DBImpl : public DB {
+   virtual const Snapshot* GetSnapshot();
+   virtual void ReleaseSnapshot(const Snapshot* snapshot);
    virtual bool GetProperty(const Slice& property, std::string* value);
    virtual void GetApproximateSizes(const Range* range, int n, uint64_t* sizes);
    virtual void CompactRange(const Slice* begin, const Slice* end);
@@ -79,7 +89,11 @@ index cfc9981..cda1d51 100644
  
    // Extra methods (for testing) that are not in the public DB interface
  
-@@ -133,6 +135,13 @@ class DBImpl : public DB {
+   // Compact any files in the named level that overlap [*begin,*end]
+   void TEST_CompactRange(int level, const Slice* begin, const Slice* end);
+@@ -131,10 +133,17 @@ class DBImpl : public DB {
+   TableCache* table_cache_;
+ 
    // Lock over the persistent DB state.  Non-NULL iff successfully acquired.
    FileLock* db_lock_;
  
@@ -93,11 +107,15 @@ index cfc9981..cda1d51 100644
    // State below is protected by mutex_
    port::Mutex mutex_;
    port::AtomicPointer shutting_down_;
+   port::CondVar bg_cv_;          // Signalled when background work finishes
+   MemTable* mem_;
 diff --git a/db/db_test.cc b/db/db_test.cc
-index 0fed913..424cedb 100644
+index a0b08bc19c6510322dc65a94e135fa17ee922659..641fbabeeb6ed6e2537f024597c984cd4f3b846b 100644
 --- a/db/db_test.cc
 +++ b/db/db_test.cc
-@@ -1837,6 +1837,10 @@ class ModelDB: public DB {
+@@ -1864,10 +1864,14 @@ class ModelDB: public DB {
+     KVMap map_;
+   };
  
    explicit ModelDB(const Options& options): options_(options) { }
    ~ModelDB() { }
@@ -108,11 +126,15 @@ index 0fed913..424cedb 100644
    virtual Status Put(const WriteOptions& o, const Slice& k, const Slice& v) {
      return DB::Put(o, k, v);
    }
+   virtual Status Delete(const WriteOptions& o, const Slice& key) {
+     return DB::Delete(o, key);
 diff --git a/include/leveldb/db.h b/include/leveldb/db.h
-index 4c169bf..c2e965f 100644
+index bfab10a0b725be9ed218783ee8fc98110fa77988..a69704d297c3feb1f60dc2856d6f9709a8879a86 100644
 --- a/include/leveldb/db.h
 +++ b/include/leveldb/db.h
-@@ -140,6 +140,12 @@ class DB {
+@@ -140,10 +140,16 @@ class DB {
+   // end==NULL is treated as a key after all keys in the database.
+   // Therefore the following call will compact the entire database:
    //    db->CompactRange(NULL, NULL);
    virtual void CompactRange(const Slice* begin, const Slice* end) = 0;
  
@@ -125,6 +147,8 @@ index 4c169bf..c2e965f 100644
   private:
    // No copying allowed
    DB(const DB&);
+   void operator=(const DB&);
+ };
 -- 
-2.9.2
+2.14.2
 
