@@ -56,7 +56,8 @@ EOF
 
 %build
 %configure
-%make_build
+# Compilation fails randomly when run in parallel
+%make_build -j1
 
 %install
 mkdir -p %{buildroot}{%{_libdir}/pkgconfig,%{_includedir}}
@@ -66,7 +67,7 @@ cp -a %{name}.pc %{buildroot}%{_libdir}/pkgconfig/
 
 %check
 %configure
-make %{?_smp_mflags} check
+make -j1 check
 
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
@@ -85,6 +86,7 @@ make %{?_smp_mflags} check
 %changelog
 * Mon Oct 23 2017 Stephen Gallagher <sgallagh@redhat.com> - 1.20-1
 - Update to 1.20
+- Disable parallel make invocation to prevent build failures
 
 * Thu Aug 03 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.18-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
