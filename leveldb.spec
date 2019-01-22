@@ -69,8 +69,7 @@ cp -a %{name}.pc %{buildroot}%{_libdir}/pkgconfig/
 %configure
 make -j1 check
 
-%post -p /sbin/ldconfig
-%postun -p /sbin/ldconfig
+%ldconfig_scriptlets
 
 %files
 %license LICENSE
