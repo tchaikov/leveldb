@@ -21,9 +21,10 @@ Patch0005:	0005-Restore-soname-versioning-with-CMake-build.patch
 # Cherry-picked from master
 Patch0006:	0006-Align-version-soversion-CMake-setup-closer-with-othe.patch
 
-BuildRequires:  make
+BuildRequires:  cmake
 BuildRequires:  gcc
 BuildRequires:  gcc-c++
+BuildRequires:  make
 BuildRequires:  snappy-devel
 BuildRequires:  sqlite-devel
 
