@@ -1,38 +1,25 @@
-From 9f7a39eb2fc0bf4e7c4df64dca5e3ed01cbde2c1 Mon Sep 17 00:00:00 2001
 From: Hiram Chirino <hiram@hiramchirino.com>
 Date: Tue, 30 Oct 2012 16:56:52 -0400
-Subject: [PATCH 2/4] Added a DB:SuspendCompations() and DB:ResumeCompactions()
+Subject: [PATCH] Added a DB:SuspendCompations() and DB:ResumeCompactions()
  methods. Fixes issue #184
 
 https://code.google.com/p/leveldb/issues/detail?id=184
----
- db/db_impl.cc        | 36 ++++++++++++++++++++++++++++++++++++
- db/db_impl.h         |  9 +++++++++
- db/db_test.cc        |  4 ++++
- include/leveldb/db.h |  6 ++++++
- 4 files changed, 55 insertions(+)
 
 diff --git a/db/db_impl.cc b/db/db_impl.cc
-index f43ad7679436b312959e5e0487c9313694d83ecc..60c483fab11177fb2d37726f3b2a94720e4dd1ff 100644
+index 3468862..a3358d1 100644
 --- a/db/db_impl.cc
 +++ b/db/db_impl.cc
-@@ -123,10 +123,13 @@ DBImpl::DBImpl(const Options& raw_options, const std::string& dbname)
-       owns_info_log_(options_.info_log != raw_options.info_log),
-       owns_cache_(options_.block_cache != raw_options.block_cache),
-       dbname_(dbname),
-       db_lock_(NULL),
-       shutting_down_(NULL),
+@@ -134,6 +134,9 @@ DBImpl::DBImpl(const Options& raw_options, const std::string& dbname)
+       table_cache_(new TableCache(dbname_, options_, TableCacheSize(options_))),
+       db_lock_(nullptr),
+       shutting_down_(false),
 +      suspend_cv(&suspend_mutex),
 +      suspend_count(0),
 +      suspended(false),
-       bg_cv_(&mutex_),
-       mem_(NULL),
-       imm_(NULL),
-       logfile_(NULL),
-       logfile_number_(0),
-@@ -1469,10 +1472,43 @@ void DBImpl::GetApproximateSizes(
-     MutexLock l(&mutex_);
-     v->Unref();
+       background_work_finished_signal_(&mutex_),
+       mem_(nullptr),
+       imm_(nullptr),
+@@ -1482,6 +1485,39 @@ void DBImpl::GetApproximateSizes(
    }
  }
  
@@ -72,15 +59,11 @@ index f43ad7679436b312959e5e0487c9313694d83ecc..60c483fab11177fb2d37726f3b2a9472
  // Default implementations of convenience methods that subclasses of DB
  // can call if they wish
  Status DB::Put(const WriteOptions& opt, const Slice& key, const Slice& value) {
-   WriteBatch batch;
-   batch.Put(key, value);
 diff --git a/db/db_impl.h b/db/db_impl.h
-index 8ff323e72879967a9ff27876155a21ffb2330d3d..78f910356318cfdd3bb4ee029a50d8a76161037f 100644
+index ca00d42..07df200 100644
 --- a/db/db_impl.h
 +++ b/db/db_impl.h
-@@ -39,10 +39,12 @@ class DBImpl : public DB {
-   virtual const Snapshot* GetSnapshot();
-   virtual void ReleaseSnapshot(const Snapshot* snapshot);
+@@ -44,6 +44,8 @@ class DBImpl : public DB {
    virtual bool GetProperty(const Slice& property, std::string* value);
    virtual void GetApproximateSizes(const Range* range, int n, uint64_t* sizes);
    virtual void CompactRange(const Slice* begin, const Slice* end);
@@ -89,12 +72,8 @@ index 8ff323e72879967a9ff27876155a21ffb2330d3d..78f910356318cfdd3bb4ee029a50d8a7
  
    // Extra methods (for testing) that are not in the public DB interface
  
-   // Compact any files in the named level that overlap [*begin,*end]
-   void TEST_CompactRange(int level, const Slice* begin, const Slice* end);
-@@ -131,10 +133,17 @@ class DBImpl : public DB {
-   TableCache* table_cache_;
- 
-   // Lock over the persistent DB state.  Non-NULL iff successfully acquired.
+@@ -137,6 +139,13 @@ class DBImpl : public DB {
+   // Lock over the persistent DB state.  Non-null iff successfully acquired.
    FileLock* db_lock_;
  
 +  port::Mutex suspend_mutex;
@@ -106,16 +85,12 @@ index 8ff323e72879967a9ff27876155a21ffb2330d3d..78f910356318cfdd3bb4ee029a50d8a7
 +
    // State below is protected by mutex_
    port::Mutex mutex_;
-   port::AtomicPointer shutting_down_;
-   port::CondVar bg_cv_;          // Signalled when background work finishes
-   MemTable* mem_;
+   std::atomic<bool> shutting_down_;
 diff --git a/db/db_test.cc b/db/db_test.cc
-index a0b08bc19c6510322dc65a94e135fa17ee922659..641fbabeeb6ed6e2537f024597c984cd4f3b846b 100644
+index 3ab4aee..8730e4f 100644
 --- a/db/db_test.cc
 +++ b/db/db_test.cc
-@@ -1864,10 +1864,14 @@ class ModelDB: public DB {
-     KVMap map_;
-   };
+@@ -2042,6 +2042,10 @@ class ModelDB: public DB {
  
    explicit ModelDB(const Options& options): options_(options) { }
    ~ModelDB() { }
@@ -126,29 +101,20 @@ index a0b08bc19c6510322dc65a94e135fa17ee922659..641fbabeeb6ed6e2537f024597c984cd
    virtual Status Put(const WriteOptions& o, const Slice& k, const Slice& v) {
      return DB::Put(o, k, v);
    }
-   virtual Status Delete(const WriteOptions& o, const Slice& key) {
-     return DB::Delete(o, key);
 diff --git a/include/leveldb/db.h b/include/leveldb/db.h
-index bfab10a0b725be9ed218783ee8fc98110fa77988..a69704d297c3feb1f60dc2856d6f9709a8879a86 100644
+index 0239593..78abfb0 100644
 --- a/include/leveldb/db.h
 +++ b/include/leveldb/db.h
-@@ -140,10 +140,16 @@ class DB {
-   // end==NULL is treated as a key after all keys in the database.
+@@ -146,6 +146,12 @@ class LEVELDB_EXPORT DB {
    // Therefore the following call will compact the entire database:
-   //    db->CompactRange(NULL, NULL);
+   //    db->CompactRange(nullptr, nullptr);
    virtual void CompactRange(const Slice* begin, const Slice* end) = 0;
- 
++
 +  // Suspends the background compaction thread.  This methods
 +  // returns once suspended.
 +  virtual void SuspendCompactions() = 0;
 +  // Resumes a suspended background compation thread.
 +  virtual void ResumeCompactions() = 0;
-+
-  private:
-   // No copying allowed
-   DB(const DB&);
-   void operator=(const DB&);
  };
--- 
-2.14.2
-
+ 
+ // Destroy the contents of the specified database.

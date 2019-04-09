@@ -1,49 +1,17 @@
-From 77961bc308c89cda06a3fb1dc2cfa9c9ced2ba48 Mon Sep 17 00:00:00 2001
 From: Hiram Chirino <chirino@gmail.com>
 Date: Fri, 5 Jul 2013 18:32:28 +0400
-Subject: [PATCH 1/4] Allow leveldbjni build
+Subject: [PATCH] Allow leveldbjni build
 
----
- build_detect_platform   | 5 +++--
- include/leveldb/slice.h | 1 -
- 2 files changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/build_detect_platform b/build_detect_platform
-index d2a20ce5b6277594ec256004121195a22b049263..fb32ae9eab6f39d62e0478d87a73579c414e9f5a 100755
---- a/build_detect_platform
-+++ b/build_detect_platform
-@@ -245,12 +245,13 @@ PLATFORM_CXXFLAGS="$PLATFORM_CXXFLAGS $COMMON_FLAGS"
- echo "CC=$CC" >> $OUTPUT
- echo "CXX=$CXX" >> $OUTPUT
- echo "PLATFORM=$PLATFORM" >> $OUTPUT
- echo "PLATFORM_LDFLAGS=$PLATFORM_LDFLAGS" >> $OUTPUT
- echo "PLATFORM_LIBS=$PLATFORM_LIBS" >> $OUTPUT
--echo "PLATFORM_CCFLAGS=$PLATFORM_CCFLAGS" >> $OUTPUT
--echo "PLATFORM_CXXFLAGS=$PLATFORM_CXXFLAGS" >> $OUTPUT
-+echo "PLATFORM_CCFLAGS=$PLATFORM_CCFLAGS $PLATFORM_SHARED_CFLAGS" >> $OUTPUT
-+echo "PLATFORM_CXXFLAGS=$PLATFORM_CXXFLAGS $PLATFORM_SHARED_CFLAGS" >> $OUTPUT
-+echo "PLATFORM_SHARED_CFLAGS=" >> $OUTPUT
- echo "PLATFORM_SSEFLAGS=$PLATFORM_SSEFLAGS" >> $OUTPUT
- echo "PLATFORM_SHARED_CFLAGS=$PLATFORM_SHARED_CFLAGS" >> $OUTPUT
- echo "PLATFORM_SHARED_EXT=$PLATFORM_SHARED_EXT" >> $OUTPUT
- echo "PLATFORM_SHARED_LDFLAGS=$PLATFORM_SHARED_LDFLAGS" >> $OUTPUT
- echo "PLATFORM_SHARED_VERSIONED=$PLATFORM_SHARED_VERSIONED" >> $OUTPUT
 diff --git a/include/leveldb/slice.h b/include/leveldb/slice.h
-index bc367986f7e8e26fdf22afc02283d4dd13970158..6f2289aaad763b83d88ccffd259540c4827b1a6a 100644
+index a86e8a6..a817395 100644
 --- a/include/leveldb/slice.h
 +++ b/include/leveldb/slice.h
-@@ -75,11 +75,10 @@ class Slice {
-   bool starts_with(const Slice& x) const {
-     return ((size_ >= x.size_) &&
+@@ -82,7 +82,6 @@ class LEVELDB_EXPORT Slice {
              (memcmp(data_, x.data_, x.size_) == 0));
    }
  
 - private:
    const char* data_;
    size_t size_;
- 
-   // Intentionally copyable
  };
--- 
-2.14.2
-

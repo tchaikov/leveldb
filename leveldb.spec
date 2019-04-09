@@ -1,10 +1,10 @@
 Name:           leveldb
-Version:        1.20
-Release:        4%{?dist}
+Version:        1.21
+Release:        1%{?dist}
 Summary:        A fast and lightweight key/value database library by Google
 License:        BSD
 URL:            https://github.com/google/leveldb
-Source0:        %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
+Source0:        %{url}/archive/%{version}/%{name}-%{version}.tar.gz
 
 # available in https://github.com/fusesource/leveldbjni/blob/leveldb.patch
 Patch0001:      0001-Allow-leveldbjni-build.patch
@@ -16,11 +16,16 @@ Patch0002:      0002-Added-a-DB-SuspendCompations-and-DB-ResumeCompaction.patch
 Patch0003:      0003-allow-Get-calls-to-avoid-copies-into-std-string.patch
 # https://groups.google.com/d/topic/leveldb/SbVPvl4j4vU/discussion
 Patch0004:      0004-bloom_test-failure-on-big-endian-archs.patch
+# Cherry-picked from master
+Patch0005:	0005-Restore-soname-versioning-with-CMake-build.patch
+# Cherry-picked from master
+Patch0006:	0006-Align-version-soversion-CMake-setup-closer-with-othe.patch
 
 BuildRequires:  make
 BuildRequires:  gcc
 BuildRequires:  gcc-c++
 BuildRequires:  snappy-devel
+BuildRequires:  sqlite-devel
 
 %description
 LevelDB is a fast key-value storage library written at Google that provides an
@@ -28,6 +33,7 @@ ordered mapping from string keys to string values.
 
 %package devel
 Summary:        Development files for %{name}
+Requires:	cmake-filesystem
 Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %description devel
@@ -35,6 +41,7 @@ Requires:       %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 
 %prep
 %autosetup -p1
+
 cat > %{name}.pc << EOF
 prefix=%{_prefix}
 exec_prefix=${prefix}
@@ -47,42 +54,44 @@ Version: %{version}
 Libs: -l%{name}
 EOF
 
-%global configure() {                  \
-  export OPT="-DNDEBUG"                \
-  export CFLAGS="%{optflags}"          \
-  export CXXFLAGS="%{optflags}"        \
-  export LDFLAGS="%{__global_ldflags}" \
-}
 
 %build
-%configure
-# Compilation fails randomly when run in parallel
-%make_build -j1
+%cmake .
+%make_build
+
 
 %install
-mkdir -p %{buildroot}{%{_libdir}/pkgconfig,%{_includedir}}
-cp -a out-shared/lib%{name}.so* %{buildroot}%{_libdir}/
-cp -a include/%{name}/ %{buildroot}%{_includedir}/
+%make_install
+
+mkdir -p %{buildroot}%{_libdir}/pkgconfig
 cp -a %{name}.pc %{buildroot}%{_libdir}/pkgconfig/
 
+
 %check
-%configure
-make -j1 check
+ctest -V %{?_smp_mflags}
+
 
 %ldconfig_scriptlets
+
 
 %files
 %license LICENSE
 %doc AUTHORS README.md NEWS
 %{_libdir}/lib%{name}.so.*
 
+
 %files devel
 %doc doc/ CONTRIBUTING.md TODO
 %{_includedir}/%{name}/
 %{_libdir}/lib%{name}.so
 %{_libdir}/pkgconfig/%{name}.pc
+%{_libdir}/cmake/%{name}/
+
 
 %changelog
+* Tue Apr 09 2019 Peter Lemenkov <lemenkov@gmail.com> - 1.21-1
+- Update to 1.21
+
 * Fri Feb 01 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.20-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
