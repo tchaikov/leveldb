@@ -1,6 +1,6 @@
 Name:           leveldb
 Version:        1.21
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A fast and lightweight key/value database library by Google
 License:        BSD
 URL:            https://github.com/google/leveldb
@@ -90,6 +90,9 @@ ctest -V %{?_smp_mflags}
 
 
 %changelog
+* Thu Jul 25 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.21-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
+
 * Tue Apr 09 2019 Peter Lemenkov <lemenkov@gmail.com> - 1.21-1
 - Update to 1.21
 
