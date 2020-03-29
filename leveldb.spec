@@ -1,6 +1,6 @@
 Name:           leveldb
-Version:        1.21
-Release:        3%{?dist}
+Version:        1.22
+Release:        1%{?dist}
 Summary:        A fast and lightweight key/value database library by Google
 License:        BSD
 URL:            https://github.com/google/leveldb
@@ -16,10 +16,6 @@ Patch0002:      0002-Added-a-DB-SuspendCompations-and-DB-ResumeCompaction.patch
 Patch0003:      0003-allow-Get-calls-to-avoid-copies-into-std-string.patch
 # https://groups.google.com/d/topic/leveldb/SbVPvl4j4vU/discussion
 Patch0004:      0004-bloom_test-failure-on-big-endian-archs.patch
-# Cherry-picked from master
-Patch0005:	0005-Restore-soname-versioning-with-CMake-build.patch
-# Cherry-picked from master
-Patch0006:	0006-Align-version-soversion-CMake-setup-closer-with-othe.patch
 
 BuildRequires:  cmake
 BuildRequires:  gcc

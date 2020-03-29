@@ -13,15 +13,15 @@ leveldb. The fix can be to bump up the acceptable false positives.
 https://groups.google.com/d/topic/leveldb/SbVPvl4j4vU/discussion
 
 diff --git a/util/bloom_test.cc b/util/bloom_test.cc
-index 1b87a2b..e464548 100644
+index 436daa9..e4edc45 100644
 --- a/util/bloom_test.cc
 +++ b/util/bloom_test.cc
-@@ -142,7 +142,7 @@ TEST(BloomTest, VaryingLengths) {
+@@ -136,7 +136,7 @@ TEST(BloomTest, VaryingLengths) {
        fprintf(stderr, "False positives: %5.2f%% @ length = %6d ; bytes = %6d\n",
-               rate*100.0, length, static_cast<int>(FilterSize()));
+               rate * 100.0, length, static_cast<int>(FilterSize()));
      }
--    ASSERT_LE(rate, 0.02);   // Must not be over 2%
-+    ASSERT_LE(rate, 0.03);   // Must not be over 2%
-     if (rate > 0.0125) mediocre_filters++;  // Allowed, but not too often
-     else good_filters++;
-   }
+-    ASSERT_LE(rate, 0.02);  // Must not be over 2%
++    ASSERT_LE(rate, 0.03);  // Must not be over 3%
+     if (rate > 0.0125)
+       mediocre_filters++;  // Allowed, but not too often
+     else

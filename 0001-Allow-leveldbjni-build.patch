@@ -4,11 +4,11 @@ Subject: [PATCH] Allow leveldbjni build
 
 
 diff --git a/include/leveldb/slice.h b/include/leveldb/slice.h
-index a86e8a6..a817395 100644
+index 2df417d..1af5635 100644
 --- a/include/leveldb/slice.h
 +++ b/include/leveldb/slice.h
-@@ -82,7 +82,6 @@ class LEVELDB_EXPORT Slice {
-             (memcmp(data_, x.data_, x.size_) == 0));
+@@ -86,7 +86,6 @@ class LEVELDB_EXPORT Slice {
+     return ((size_ >= x.size_) && (memcmp(data_, x.data_, x.size_) == 0));
    }
  
 - private:
